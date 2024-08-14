@@ -1,0 +1,40 @@
+import paramiko
+
+# Параметры подключения
+PLC_IP = "your_plc_ip"  # Укажите IP-адрес PLC
+USERNAME = "root"       # Логин для SSH
+PASSWORD = "zeon"       # Пароль для SSH
+
+# Команда для получения IP и MAC адресов
+COMMAND = """
+ip -o link show | awk '/ether/ {print $2, $17}';
+ip -o -4 addr show | awk '/eth/ {print $2, $4}'
+"""
+
+def get_plc_info(ip, username, password):
+    # Создаем SSH-клиент
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    try:
+        # Подключаемся к PLC
+        client.connect(ip, username=username, password=password)
+
+        # Выполняем команду
+        stdin, stdout, stderr = client.exec_command(COMMAND)
+        
+        # Получаем результат
+        output = stdout.read().decode('utf-8')
+        errors = stderr.read().decode('utf-8')
+
+        if errors:
+            print(f"Errors: {errors}")
+        else:
+            print(f"Output:\n{output}")
+
+    finally:
+        # Закрываем соединение
+        client.close()
+
+if __name__ == "__main__":
+    get_plc_info(PLC_IP, USERNAME, PASSWORD)
