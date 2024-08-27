@@ -1,0 +1,24 @@
+from pywinauto import Application
+import pywinauto
+
+# Подключение к приложению (если оно уже запущено)
+app = Application(backend="win32").connect(title="ABAK PLC Configurator")
+dlg = app.window(title="ABAK PLC Configurator")
+
+# Получение размеров окна приложения
+window_rect = dlg.rectangle()
+
+# Получение размеров экрана
+screen_width = pywinauto.win32functions.GetSystemMetrics(0)
+screen_height = pywinauto.win32functions.GetSystemMetrics(1)
+
+# Проверка, развернуто ли окно на весь экран
+is_full_screen = (window_rect.left == 0 and window_rect.top == 0 and
+                  window_rect.right == screen_width and window_rect.bottom == screen_height)
+
+if is_full_screen:
+    print("Окно уже развернуто на весь экран.")
+else:
+    print("Окно не развернуто на весь экран. Разворачиваем...")
+    dlg.maximize()  # Развернуть окно на весь экран
+
